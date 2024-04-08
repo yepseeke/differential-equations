@@ -26,7 +26,7 @@ class DynamicalSystem:
 
             return np.array([sigma * (y - x), x * (r - z) - y, x * y - beta * z])
 
-        if self.name == 'van-der-pol':
+        elif self.name == 'van-der-pol':
             self.dimension = 2
 
             if variables.shape != (self.dimension,):
@@ -39,7 +39,7 @@ class DynamicalSystem:
             return np.array([y, a * y - x * x * y - x]) if n == 0 \
                 else np.array([y, (a * y - x * x * y - x * (1 + n * y)) * (1 + n * y) ** 2])
 
-        if self.name == 'rayleigh':
+        elif self.name == 'rayleigh':
             self.dimension = 2
 
             if variables.shape != (self.dimension,):
@@ -51,6 +51,18 @@ class DynamicalSystem:
 
             return np.array([y, (a - y ** 2) * y - x]) if n == 0 \
                 else np.array([y, a * y * (1 + n * y) ** 2 - y ** 3 - x * ((1 + n * y) ** 3)])
+        elif self.name == 'unknown':
+            self.dimension = 3
+
+            if variables.shape != (self.dimension,):
+                raise Exception(f"Expected {self.dimension}d vector")
+
+            x, y, z = variables[:3]
+
+            a, b, alpha, omega = map(float, self.params)
+
+            return np.array(
+                [y, z, alpha * (np.cos(x) * z - np.sin(x) * y ** 2) - omega ** 2 * (y - alpha * np.sin(x) - a)])
 
         else:
             raise ValueError(f"Unknown system: {self.name}")
