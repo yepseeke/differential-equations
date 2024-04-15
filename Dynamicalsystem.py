@@ -1,7 +1,7 @@
 import numpy as np
 
 from typing import Callable
-from numba import jit, njit
+# from numba import jit, njit
 
 
 class DynamicalSystem:
