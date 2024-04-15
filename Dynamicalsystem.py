@@ -1,6 +1,9 @@
 import numpy as np
 
+from scipy.fft import fft
 from typing import Callable
+
+
 # from numba import jit, njit
 
 
@@ -51,7 +54,7 @@ class DynamicalSystem:
 
             return np.array([y, (a - y ** 2) * y - x]) if n == 0 \
                 else np.array([y, a * y * (1 + n * y) ** 2 - y ** 3 - x * ((1 + n * y) ** 3)])
-        elif self.name == 'unknown':
+        elif self.name == 'josephson':
             self.dimension = 3
 
             if variables.shape != (self.dimension,):
@@ -77,6 +80,27 @@ class DynamicalSystem:
 
         axs.plot(x, y)
 
+    # m - amount of periods T
+    # N - points in each period
+    # coordinate - for what axis calculate spectral density
+    # 1 - x
+    # 2 - y
+    # 3 - z
+    def spectral_density(self, x0: np.array, T: float, m: int, N: int, coordinate: int):
+        # if self.dimension < coordinate:
+        #     raise ValueError(f"No such variable in system: {coordinate}")
+        n = m * N
+        points = self.solve(x0, m * T, n).T[coordinate - 1]
+        print(points)
+        res_fft = np.zeros(N)
+        for i in range(m):
+            curr_points = points[i * N:(i + 1) * N]
+            # print(curr_points)
+            curr_fft = np.abs(fft(curr_points, N))
+            res_fft += np.square(curr_fft)
+
+        return 2 * res_fft[0:N // 2] / (m * T)
+
 
 def rk_step(f, x0: np.array, t1: float, t2: float) -> np.array:
     h = t2 - t1
@@ -96,8 +120,9 @@ def rk(f, x0: np.array, T: float, N: int) -> np.array:
     t = np.linspace(0, T, N + 1)
     for i in range(N):
         if (i + 1) % 100 == 0:
-            print(i + 1)
+            print(i + 1, t[i])
         x = rk_step(f, x0, t[i], t[i + 1])
+        # print(x)
         points = np.append(points, [x], axis=0)
         x0 = x
 
