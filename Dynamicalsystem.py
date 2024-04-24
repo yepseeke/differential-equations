@@ -80,6 +80,14 @@ class DynamicalSystem:
 
         axs.plot(x, y)
 
+    def plot_3d(self, axs, x0: np.array, T: float, N: int, color=None):
+
+        solution = self.solve(x0, T, N)
+        if color is None:
+            axs.plot(solution[:, 0], solution[:, 1], solution[:, 2])
+        else:
+            axs.plot(solution[:, 0], solution[:, 1], solution[:, 2], color=color)
+
     # m - amount of periods T
     # N - points in each period
     # coordinate - for what axis calculate spectral density
