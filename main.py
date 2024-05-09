@@ -44,7 +44,7 @@ def draw_initial_condition_curve(a: float, b: float, alpha: float, omega: float,
 # x0_arr = np.linspace(-15, 15, 12)
 def draw_3d_trajectories_on_curve(ax, a: float, b: float, alpha: float, omega: float,
                                   start: float, end, N: int):
-    ds = DynamicalSystem(f'josephson_{a}_{b}_{alpha}_{omega}')
+    ds = DynamicalSystem(f'josephson-3_{a}_{b}_{alpha}_{omega}')
 
     points = generate_initial_conditions(a, b, alpha, omega, start, end, N)
 
@@ -53,13 +53,14 @@ def draw_3d_trajectories_on_curve(ax, a: float, b: float, alpha: float, omega: f
 
 
 def draw_2d_trajectories_on_curve(a: float, b: float, alpha: float, omega: float, x0s):
+    ds = DynamicalSystem(f'josephson-3_{a}_{b}_{alpha}_{omega}')
     points = get_initial_conditions(a, b, alpha, omega, x0s)
     for x in points:
         ds.plot_3d(plt, x, 400, 10000)
 
 
 def draw_3d_trajectories_by_points(ax, a: float, b: float, alpha: float, omega: float, points: np.array, color='k'):
-    ds = DynamicalSystem(f'josephson_{a}_{b}_{alpha}_{omega}')
+    ds = DynamicalSystem(f'josephson-3_{a}_{b}_{alpha}_{omega}')
 
     for x in points:
         ds.plot_3d(ax, x, 400, 10000, color=color)
@@ -75,25 +76,43 @@ def generate_random_points_in_cube(N, L=1):
 
 
 def draw_3d_random_trajectories(ax, a: float, b: float, alpha: float, omega: float, N, L):
-    ds = DynamicalSystem(f'josephson_{a}_{b}_{alpha}_{omega}')
+    ds = DynamicalSystem(f'josephson-3_{a}_{b}_{alpha}_{omega}')
 
     points = generate_random_points_in_cube(N, L)
     for x in points:
         ds.plot_3d(ax, x, 400, 10000, color='k')
 
 
+def calculate_L2(f, g, N):
+    res = 0
+    for i in range(N):
+        res += f[i] * g[i]
+    return 1 / N * res
+
+
 if __name__ == '__main__':
-    ax = plt.figure().add_subplot(projection='3d')
+    # ax = plt.figure().add_subplot(projection='3d')
 
-    a, b, alpha, omega = 0, 1, 1, 100
+    a, b, alpha, omega = 0, 1, 1, 200
 
-    ds = DynamicalSystem(f'josephson_{a}_{b}_{alpha}_{omega}')
+    ds1 = DynamicalSystem(f'josephson-1_{a}_{b}_{alpha}_{omega}')
+    ds3 = DynamicalSystem(f'josephson-3_{a}_{b}_{alpha}_{omega}')
 
     # points = generate_initial_conditions(a, b, alpha, omega, -1, 1, 1)
 
     # draw_3d_trajectories_by_points(ax, a, b, alpha, omega, np.array([[0.1, 0.2, -0.2]]))
 
-    draw_3d_trajectories_on_curve(ax, a, b, alpha, omega, -4, 4, 1)
+    # draw_3d_trajectories_on_curve(ax, a, b, alpha, omega, -4, 4, 1)
+    x1 = ds1.solve(np.array([0.1]), 30, 10000).T[0]
+
+    x2 = ds3.solve(calculate_initial_conditions(0.1, a, b, alpha, omega), 30, 10000).T[0]
+
+    ds1.plot_1d(plt, np.array([0.1]), 30, 1000)
+    ds3.plot_1d(plt, calculate_initial_conditions(0.1, a, b, alpha, omega), 30, 10000)
+
+    print(calculate_L2(x1, x2, 10000))
+    # ds1.plot_1d(plt, np.array([-0.4]), 30, 1000)
+    # ds3.plot_1d(plt, calculate_initial_conditions(-0.4, a, b, alpha, omega), 30, 10000)
 
     plt.show()
 

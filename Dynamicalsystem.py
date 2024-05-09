@@ -54,7 +54,7 @@ class DynamicalSystem:
 
             return np.array([y, (a - y ** 2) * y - x]) if n == 0 \
                 else np.array([y, a * y * (1 + n * y) ** 2 - y ** 3 - x * ((1 + n * y) ** 3)])
-        elif self.name == 'josephson':
+        elif self.name == 'josephson-3':
             self.dimension = 3
 
             if variables.shape != (self.dimension,):
@@ -66,12 +66,34 @@ class DynamicalSystem:
 
             return np.array(
                 [y, z, alpha * (np.cos(x) * z - np.sin(x) * y ** 2) - omega ** 2 * (y - alpha * np.sin(x) - a)])
+        elif self.name == 'josephson-1':
+            self.dimension = 1
+
+            print(variables)
+
+            if variables.shape != (self.dimension,):
+                raise Exception(f"Expected {self.dimension}d vector")
+
+            x = variables
+
+            a, b, alpha, omega = map(float, self.params)
+
+            return np.array(alpha * np.sin(x) + a)
 
         else:
             raise ValueError(f"Unknown system: {self.name}")
 
     def solve(self, x0: np.array, T: float, N: int):
+        # print(x0)
         return rk(self.f, x0, T, N)
+
+    def plot_1d(self, axs, x0: np.array, T: float, N: int):
+        solution = self.solve(x0, T, N)
+        x = solution[:, 0]
+
+        t = np.linspace(0, T, N + 1)
+
+        axs.plot(x, t)
 
     def plot_2d(self, axs, x0: np.array, T: float, N: int):
         solution = self.solve(x0, T, N)
